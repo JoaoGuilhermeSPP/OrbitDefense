@@ -1,57 +1,106 @@
-using NUnit.Framework.Internal;
-using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class EnemyLife : MonoBehaviour
 {
     public EnemyScript enemySettigns;
+
     public int Life;
     public int speed;
     public int Damage;
-    SpriteRenderer Sr;
-    Color OrigColor;
+
+    private SpriteRenderer Sr;
+    private Color OrigColor;
     public GameObject explosion;
-    
-    
-    void Start()
+
+    private Tween damageTween; // Guarda referência do Tween
+
+    void Awake()
     {
         Life = enemySettigns.Life;
         speed = enemySettigns.speed;
         Damage = enemySettigns.Damage;
-        Sr  = gameObject.GetComponent<SpriteRenderer>();
+        Sr = gameObject.GetComponent<SpriteRenderer>();
         OrigColor = Sr.color;
-
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy()
     {
-        
+        // MATA o Tween antes de destruir o objeto!
+        if (damageTween != null && damageTween.IsActive())
+        {
+            damageTween.Kill();
+            damageTween = null;
+        }
+
+        // Restaura a cor original (segurança)
+        if (Sr != null)
+            Sr.color = OrigColor;
     }
-  public  void takeDamage(int damage)
+
+    public void takeDamage(int damage)
     {
         Life -= damage;
 
-        StartCoroutine(Effect());
+        // Mata tween anterior se existir
+        if (damageTween != null && damageTween.IsActive())
+        {
+            damageTween.Kill();
+            Sr.color = OrigColor;
+        }
+
+        // Cria nova animação e guarda referência
+        damageTween = Sr.DOColor(Color.red, 0.2f)
+            .SetLoops(7, LoopType.Yoyo)
+            .OnComplete(() =>
+            {
+                if (Sr != null)
+                    Sr.color = Color.white;
+            });
 
         if (Life <= 0)
         {
             Die();
         }
-
     }
+
     void Die()
     {
-        GameObject explosionInstace = Instantiate(explosion, transform.position, Quaternion.identity);
-        Destroy(explosionInstace, 2f);
+        // Mata o Tween ANTES de destruir
+        if (damageTween != null && damageTween.IsActive())
+        {
+            damageTween.Kill();
+            damageTween = null;
+        }
+
+        // Efeito de explosão
+        if (explosion != null)
+        {
+            GameObject explosionInstance = Instantiate(explosion, transform.position, Quaternion.identity);
+            explosionInstance.transform.SetParent(null); // Garante independência
+            Destroy(explosionInstance, 2f);
+        }
+
+        // Som
+        if (SFXManager.current != null)
+            SFXManager.current.PlayMusic(SFXManager.current.splosion);
+
+        // Missões
+        if (MissionManager.instance != null)
+        {
+            MissionManager.instance.AddMissionProgress(Mission.Score, 10);
+            MissionManager.instance.AddMissionProgress(Mission.KillEnemies, 1);
+        }
+        else
+        {
+            Debug.LogWarning("MissionManager não encontrado ao destruir EnemyLife");
+        }
+
+        // Score
+        if (gameScore.instance != null)
+            gameScore.instance.ScoreCollect();
+
+        // Destroi o objeto
         Destroy(gameObject);
     }
-   public IEnumerator Effect()
-    {
-        Sr.color = Color.red;
-        yield return new WaitForSeconds(0.2f);
-        Sr.color = OrigColor;
-
-    }
-    
 }

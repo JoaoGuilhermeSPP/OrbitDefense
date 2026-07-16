@@ -1,31 +1,76 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class Bullet : MonoBehaviour
 {
+    public SpriteRenderer spriteRenderer;
     public GameObject explosion;
-    private EnemyLife EnemyLife;
 
-    private void Start()
-    {
-        
-    }
+    private bool hasExploded = false;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Mundo"))
+        if (hasExploded) return;
+
+        if (collision.CompareTag("Mundo"))
             return;
 
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (collision.CompareTag("Shield"))
+            return;
+
+        if (collision.CompareTag("bullet"))
+            return;
+
+        // ===== BUFF =====
+        if (collision.CompareTag("Buff"))
         {
-            collision.GetComponent<EnemyLife>().takeDamage(10);
+            Debug.Log($"Bullet atingiu Buff: {collision.gameObject.name}");
+
+            if (PowerUpMecanic.instance != null)
+            {
+                PowerUpMecanic.instance.CollectBuff(collision.gameObject);
+
+                if (SFXManager.current != null)
+                    SFXManager.current.PlayMusic(SFXManager.current.Buff);
+            }
+            else
+            {
+                Debug.LogWarning("PowerUpMecanic.instance é NULL ao coletar buff!");
+            }
+
+            Explode();
+            return;
+        }
+        // ===== ENEMY =====
+        if (collision.CompareTag("Enemy"))
+        {
+            EnemyLife enemyLife = collision.GetComponent<EnemyLife>();
+            if (enemyLife != null)
+                enemyLife.takeDamage(10);
         }
 
-        GameObject explosionInstace = Instantiate(explosion, transform.position, Quaternion.identity);
-        Destroy(gameObject);
-        Destroy(explosionInstace,1f);
+        if (collision.CompareTag("Boss"))
+        {
+            BossLife bossLife = collision.GetComponent<BossLife>();
+            if (bossLife != null)
+                bossLife.takeDamage(10);
+        }
 
+        Explode();
     }
-   
+
+    private void Explode()
+    {
+        if (hasExploded) return;
+        hasExploded = true;
+
+        if (explosion != null)
+        {
+            GameObject explosionInstance = Instantiate(explosion, transform.position, Quaternion.identity);
+            explosionInstance.transform.SetParent(null); // Garante independência
+            Destroy(explosionInstance, 1f);
+        }
+
+        Destroy(gameObject);
+    }
 }

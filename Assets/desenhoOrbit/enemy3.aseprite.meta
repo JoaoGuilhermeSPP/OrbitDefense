@@ -125,7 +125,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: enemy3
     originalName: 
-    pivot: {x: 0.5, y: 1}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -133,7 +133,7 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 32
+      width: 34
       height: 22
     spriteID: cc0802c6d56713144ab0840117e70ea3
     spriteBone: []
@@ -162,9 +162,9 @@ ScriptedImporter:
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 16
+        x: 15
         y: 22
-        width: 32
+        width: 34
         height: 22
       spriteId: cc0802c6d56713144ab0840117e70ea3
     linkedCells: []

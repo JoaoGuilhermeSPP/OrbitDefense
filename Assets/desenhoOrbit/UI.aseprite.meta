@@ -155,8 +155,8 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 28
-      width: 94
-      height: 27
+      width: 97
+      height: 29
     spriteID: ac445b405febda341bf5f2cc57c25809
     spriteBone: []
     spriteOutline: []
@@ -174,10 +174,10 @@ ScriptedImporter:
     customData: 
     rect:
       serializedVersion: 2
-      x: 29
+      x: 30
       y: 16
-      width: 11
-      height: 10
+      width: 13
+      height: 12
     spriteID: df4a79e9d3bf9024992ee45b8958df72
     spriteBone: []
     spriteOutline: []
@@ -195,10 +195,10 @@ ScriptedImporter:
     customData: 
     rect:
       serializedVersion: 2
-      x: 41
+      x: 42
       y: 16
-      width: 11
-      height: 10
+      width: 13
+      height: 12
     spriteID: 16fc4846ab761e74db48860982804e4b
     spriteBone: []
     spriteOutline: []
@@ -216,10 +216,10 @@ ScriptedImporter:
     customData: 
     rect:
       serializedVersion: 2
-      x: 53
+      x: 54
       y: 16
-      width: 11
-      height: 10
+      width: 13
+      height: 12
     spriteID: 0f16fa59b229dd8459af05772e1ec13a
     spriteBone: []
     spriteOutline: []
@@ -258,10 +258,10 @@ ScriptedImporter:
     customData: 
     rect:
       serializedVersion: 2
-      x: 30
-      y: 6
-      width: 67
-      height: 7
+      x: 31
+      y: 5
+      width: 70
+      height: 11
     spriteID: 099a276be56385e40b58ca1200e71168
     spriteBone: []
     spriteOutline: []
@@ -288,10 +288,10 @@ ScriptedImporter:
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 2
-        y: 1
-        width: 94
-        height: 51
+        x: 0
+        y: 0
+        width: 98
+        height: 54
       spriteId: d7f0a712a5f277f4a8e54cd17bc26b39
     linkedCells: []
     parentIndex: -1

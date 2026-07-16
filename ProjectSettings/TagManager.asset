@@ -7,6 +7,11 @@ TagManager:
   - Mundo
   - Shield
   - Enemy
+  - Buff
+  - bullet
+  - Boss
+  - TeleportPoint
+  - CentroDoLaser
   layers:
   - Default
   - TransparentFX
@@ -15,16 +20,16 @@ TagManager:
   - Water
   - UI
   - Word
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - bullet
+  - buffs
+  - Ground
+  - Enemy
+  - bulletbounce
+  - Boss
+  - bulletBoss3
+  - ShieldPlayer
+  - CentroDoLaser
   - 
   - 
   - 

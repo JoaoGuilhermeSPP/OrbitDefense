@@ -1,12 +1,9 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.GraphicsBuffer;
 
 public class EnemysTwo : MonoBehaviour
 {
-    
-    
     public bool atacando;
     NavMeshAgent agent;
     public EnemyLife stats;
@@ -16,16 +13,24 @@ public class EnemysTwo : MonoBehaviour
     public Transform point;
     public float force = 20f;
     public float fireRate = 0.5f;
-    public float FireTime = 0.2f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private float FireTime = 0.2f;
+
+    private bool isDead = false;
+    private bool hasStartedAttack = false;
+    private Coroutine fireCoroutine;
+
     void Start()
     {
-
         atacando = false;
         stats = GetComponent<EnemyLife>();
         agent = GetComponent<NavMeshAgent>();
-        agent.updateRotation = false;
-        agent.updateUpAxis = false;
+
+        if (agent != null)
+        {
+            agent.updateRotation = false;
+            agent.updateUpAxis = false;
+            agent.autoBraking = true;
+        }
 
         GameObject mundo = GameObject.FindGameObjectWithTag("Mundo");
         if (mundo != null)
@@ -34,48 +39,93 @@ public class EnemysTwo : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        agent.SetDestination(target.position);
+        if (isDead || target == null || agent == null) return;
+
+        // Só seta destino se estiver no NavMesh
+        if (agent.isOnNavMesh && agent.isActiveAndEnabled)
+        {
+            agent.SetDestination(target.position);
+        }
+
         if (target != null)
         {
             Vector3 direction = (target.position - transform.position);
             float angles = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, 0, angles + 90f);
         }
-        if (atacando == true)
+
+        if (atacando)
         {
             transform.RotateAround(target.transform.position, Vector3.back, 10 * Time.deltaTime);
-            StartCoroutine(Fire(8f));
-                
         }
     }
-    IEnumerator Fire(float delay)
+
+    IEnumerator FireRoutine()
     {
-      
-        yield return new WaitForSeconds(delay);
-
-      
-        if (Time.time >= FireTime)
+        while (atacando && !isDead)
         {
-            GameObject bullet = Instantiate(BulletPrefab, point.position, point.rotation);
+            yield return new WaitForSeconds(fireRate);
 
-            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-            rb.AddForce(point.up * -force, ForceMode2D.Impulse);
+            if (!atacando || isDead || BulletPrefab == null || point == null)
+                yield break;
 
-            FireTime = Time.time + fireRate;
- 
-            Destroy(bullet, 2f);
+            if (Time.time >= FireTime)
+            {
+                GameObject bullet = Instantiate(BulletPrefab, point.position, point.rotation);
+
+                if (SFXManager.current != null)
+                    SFXManager.current.PlayMusic(SFXManager.current.bulletEnemys);
+
+                Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+                if (rb != null)
+                {
+                    rb.AddForce(point.up * -force, ForceMode2D.Impulse);
+                }
+
+                FireTime = Time.time + fireRate;
+                Destroy(bullet, 2f);
+            }
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Mundo"))
+        if (isDead) return;
+
+        if (collision.CompareTag("Mundo") && !hasStartedAttack)
         {
+            hasStartedAttack = true;
             atacando = true;
-            agent.isStopped = true;
+
+            if (agent != null && agent.isOnNavMesh)
+                agent.isStopped = true;
+
+            // Inicia UMA ÚNICA corrotina de disparo
+            fireCoroutine = StartCoroutine(FireRoutine());
+
+            // Autodestruição após 8 segundos
+            Destroy(gameObject, 8f);
         }
+    }
+
+    private void OnDestroy()
+    {
+        isDead = true;
+        atacando = false;
+
+        // Para a corrotina de disparo
+        if (fireCoroutine != null)
+        {
+            StopCoroutine(fireCoroutine);
+            fireCoroutine = null;
+        }
+
+        StopAllCoroutines();
+
+        agent = null;
+        target = null;
+        stats = null;
     }
 }
